@@ -1,0 +1,346 @@
+<script>
+console.log('final', solution([[0,0,1,0,0],[0,1,0,1,0],[1,0,1,0,1],[0,1,0,1,0],[0,0,1,0,0]])) //	4
+console.log('final', solution([[0,0,0,1,0,0,0],[0,0,1,0,1,1,0],[0,1,0,1,0,0,1],[1,0,0,0,1,1,0],[0,1,0,1,0,1,0],[1,0,1,0,0,0,1],[0,1,0,1,0,1,0]])) //	3
+function solution(board) {
+	var size = board[0].length,
+		answer = 0;
+	for (var i = 0, j; i < size-2; i++) {
+		for (j = 1; j < size-1; j++) {
+			if (board[i][j]) {
+				finddiamond(j-1, j+1, i+1);
+			}
+		}
+	}
+	function finddiamond(startx, endx, y, isreduce) {
+		var isended = false;
+		for (var isreduce = isreduce || false, i; y < size; y++) {
+			if (!board[y][startx] || !board[y][endx]) {
+				return;
+			}
+			for (i = startx+1; i < endx; i++) {
+				if (board[y][i]) {
+					return;
+				}
+			}
+			if (isreduce) {
+				startx++;
+				endx--;
+				if (startx === endx) {
+					if (!board[y+1] || !board[y+1][startx]) {
+						return;
+					}
+					isended = true;
+					break;
+				}
+			} else {
+				finddiamond(startx, endx, y, true);
+				startx--;
+				endx++;
+			}
+		}
+		if (isended) {
+			answer++;
+		}
+	}
+	return answer;
+}
+</script>
+<scripts>
+console.log(solution(3, [[1,3,1],[3,1,1]])); //	2
+console.log(solution(3, [[1,3,2],[3,1,1]])); // 3
+console.log(solution(3, [[1,1,1]])); // 0
+function solution(N, facility) {
+    var map = [],
+    	answer = 0;
+    for (var i = 1, j, k, numfacilities = facility.length, importance, eachimportance; i <= N; i++) {
+    	for (j = 1; j <= N; j++) {
+    		for (k = 0, importance = 0; k < numfacilities; k++) {
+    			eachimportance = (Math.abs(facility[k][0]-i)+Math.abs(facility[k][1]-j))*facility[k][2];
+    			if (eachimportance > importance) {
+    				importance = eachimportance;
+    			}
+    		}
+    		map[(i-1)*N + (j-1)] = importance;
+    	}
+    }
+    return Math.min.apply(null, map);
+}
+</scripts>
+<scripts>
+console.log(solution(["10/05 10/12 2400", "10/05 10/10 2500", "10/07 10/15 2300", "10/08 10/30 3000", "10/15 11/03 3000", "10/20 11/01 3500", "11/02 11/11 4000"])); // 3500
+console.log(solution(["07/01 07/30 2000", "07/01 07/15 2000", "07/01 07/30 2000", "07/01 07/30 1500", "07/05 07/30 2100", "07/20 08/01 2400", "07/20 07/31 2400", "07/31 09/01 2900", "08/01 08/15 3000", "08/14 08/19 2000","08/17 08/30 4000"])); // 3000
+function solution(offers) {
+	offers = offers.map(function(offer) {
+		var info = offer.match(/^([0-9]{2})\/([0-9]{2}) ([0-9]{2})\/([0-9]{2}) ([0-9]+)$/);
+		return {
+			receive: parseInt(info[1]+info[2]),
+			end: parseInt(info[3]+info[4]),
+			value: parseInt(info[5])
+		};
+	});
+	for (var bestofferindex = 0,
+			answer = offers[0].value,
+			offer, i = 1, numoffers = offers.length; i < numoffers; i++) {
+		offer = offers[i];
+		if (offers[bestofferindex].end > offer.receive) {
+			if (offer.value > answer) {
+				answer = offer.value;
+				bestofferindex = i;
+			} else if (offer.value === answer && offer.end > offers[bestofferindex].end) {
+				bestofferindex = i;
+			}
+		}
+	}
+	return answer;
+}
+</scripts>
+<scripts>
+console.log(permutations('catt'));
+function permutations(string) {
+	let letters = string.split(''),
+		results = [[letters.shift()]];
+	while (letters.length) {
+		console.log(JSON.stringify(letters), JSON.stringify(results));
+		const currLetter = letters.shift();
+		console.log(currLetter);
+		let tmpResults = [];
+		results.forEach(result => {
+			let rIdx = 0;
+			while (rIdx <= result.length) {
+				const tmp = [...result];
+				tmp.splice(rIdx, 0, currLetter);
+				tmpResults.push(tmp);
+				console.log(result, rIdx, JSON.stringify(tmpResults));
+				rIdx++;
+			}
+		});
+		results = tmpResults;
+	}
+	return results.map(letterArray => letterArray.join(''))
+		.filter((el, idx, self) => (self.indexOf(el) === idx))
+		// .sort();
+}
+</scripts>
+<scripts>
+// 다리를 지나는 트럭.
+console.log(solution(2, 10, [7,4,5,6])); // 8
+console.log(solution(100, 100, [10])); // 101
+console.log(solution(100, 100, [10,10,10,10,10,10,10,10,10,10])); // 110
+function solution(bridge_length, weight, truck_weights) {
+	var time = 0,
+		queue = [];
+
+	while (truck_weights.length) {
+		time++;
+		for (var i = 0, numQueues = queue.length; i < numQueues; i++) {
+			if (time === queue[i].startAt+bridge_length) {
+				queue.shift();
+				break;
+			}
+		}
+		if (weight >= queue.reduce(sumQueueWeights, 0)+truck_weights[0]) {
+			queue.push({
+				weight: truck_weights.shift(),
+				startAt: time
+			});
+		}
+	}
+
+	function sumQueueWeights(total, truckInfo) {
+		return total+truckInfo.weight;
+	}
+
+	return time+bridge_length;
+}
+</scripts>
+<scripts>
+// 탑. LV2. 스택/큐 문제인데 어떻게 적용하는 것인지?
+console.log(solution([6,9,5,7,4])); // [0,0,2,2,4]
+console.log(solution([3,9,9,3,5,7,2])); // [0,0,0,3,3,3,6]
+console.log(solution([1,5,3,6,7,6,5])); // [0,0,2,0,0,5,6]
+function solution(heights) {
+	var answer = [];
+	for (var i = heights.length-1; i > 0; i--) {
+		var current = heights[i],
+			index = -1;
+		for (var j = i-1; j >= 0; j--) {
+			if (heights[j] > current) {
+				index = j;
+				break;
+			}
+		}
+		answer.unshift(index+1);
+	}
+	answer.unshift(0);
+	return answer;
+}
+</scripts>
+
+<scripts>
+// 베스트 앨범. LV3. 크게 어렵진 않음..
+console.log(solution(
+	['classic', 'pop', 'classic', 'classic', 'pop'],
+	[500, 600, 150, 800, 2500]
+));
+function solution(genres, plays) {
+	let map = genres.reduce(function(_map, genre, index) {
+			if (_map[genre]) {
+				_map[genre].plays += plays[index];
+				_map[genre].items.push([index, plays[index]]);
+			} else {
+				_map[genre] = {
+					plays: plays[index],
+					items: [[index, plays[index]]]
+				};
+			}
+			return _map;
+		}, {}),
+		order = [],
+		answer = [];
+
+	for (let key in map) {
+		order.push([key, map[key].plays]);
+	}
+	order.sort(sortByPlays);
+
+	for (let i = 0, numOrders = order.length; i < numOrders; i++) {
+		let genre = order[i][0];
+		map[genre].items.sort(sortByPlays);
+		for (let j = 0, numItems = Math.min(2, map[genre].items.length); j < numItems; j++) {
+			answer.push(map[genre].items[j][0]);
+		}
+	}
+
+	function sortByPlays(a, b) {
+		return b[1]-a[1];
+	}
+
+	return answer;
+}
+</scripts>
+<scripts>
+	// 완주하지 못한 선수. LV1. 완주자들 이름을 {이름: 등장횟수} 형태의 map을 만들어서 array.find함수로 0인 이름을 찾음.
+	var dic = ['a', 'b', 'b', 'c', 'd'].reduce((obj, t)=> (obj[t]= obj[t] ? obj[t]+1 : 1 , obj) ,{});
+	console.log(dic);
+	var dic2 = ['a', 'b', 'b', 'c', 'd'].reduce(function(obj, t) {
+		console.log(obj, t);
+		obj[t] = obj[t] ? obj[t]+1 : 1;
+		return obj;
+	}, {});
+	console.log(dic2, ['a', 'b', 'b', 'c', 'd', 'e'].find(function(name) {
+		console.log(dic2[name]);
+		if (dic2[name]) {
+			dic2[name]--;
+		} else {
+			return true;
+		}
+	}));
+</scripts>
+<scripts>
+// 위장. 경우의 수. LV2.
+// (a+1)*(b+1)*(c+1) -1 => 공식이었음. ㅠ
+console.log(solution([
+	['yellow_hat', 'headgear'],
+	['green_turban', 'headgear'],
+	['blue_sunglasses', 'eyewear'],
+	['sky_mask', 'face']
+]));
+// console.log(solution([
+// 	['yellow_hat', 'headgear'],
+// 	['red_hat', 'headgear'],
+// 	['green_turban', 'headgear'],
+// 	['blue_sunglasses', 'eyewear'],
+// 	['crow_mask', 'face'],
+// 	['sky_mask', 'face'],
+// 	['blue_jean', 'pants']
+// ]));
+function solution(clothes) {
+    var map = clothes.reduce(function(_map, item) {
+            var type = item[1];
+            _map[type] = _map[type] ? _map[type]+1 : 1;
+            return _map;
+        }, {}),
+        numClothesList = Object.values(map);
+    return numClothesList.reduce(function(total, length) {
+        return total*(length+1);
+    }, 1) - 1;
+}
+function solution___(clothes) {
+    var objj = clothes.reduce((obj, t)=> {
+        obj[t[1]] = obj[t[1]] ? obj[t[1]] + 1 : 1;
+        return obj;
+    } , {});
+    console.log(objj);
+    objj = Object.values(objj);
+    console.log(objj);
+    return objj.reduce(function(a, b) {
+    	console.log(a, b);
+    	return a*(b+1);
+    }, 1)-1;
+    return objj.reduce((a,b)=> a*(b+1), 1)-1;
+}
+function solution___(clothes) {
+    var numCases = 0;
+    for (var i = 0, numClothes = clothes.length; i < numClothes; i++) {
+        numCases++;
+        console.log(clothes[i][0]);
+        for (var j = i+1; j < numClothes; j++) {
+            if (clothes[i][1] !== clothes[j][1]) {
+        		console.log(clothes[i][0]+'+'+clothes[j][0]);
+                numCases++;
+            }
+        }
+    }
+    return numCases;
+}
+/*
+[
+	[yellow_hat, headgear],
+	[blue_sunglasses, eyewear],
+	[green_turban, headgear]
+]
+[
+	[yellow_hat, headgear],
+	[red_hat, headgear],
+	[green_turban, headgear],
+	[blue_sunglasses, eyewear],
+	[crow_mask, face]
+]
+headgear 3
+eyewear 1
+face 1
+5 + 2 + 2 + 2 + 1
+yellow_hat + blue_sunglasses|crow_mask 2
+red_hat + blue_sunglasses|crow_mask 2
+green_turban + blue_sunglasses|crow_mask 2
+blue_sunglasses + crow_mask 1
+12
+
+[
+	[yellow_hat, headgear],
+	[red_hat, headgear],
+	[green_turban, headgear],
+	[blue_sunglasses, eyewear],
+	[crow_mask, face],
+	[sky_mask, face]
+]
+headgear 3
+eyewear 1
+face 2
+5 + 3 + 3 + 3 + 2
+yellow_hat+ blue_sunglasses|crow_mask|sky_mask 3
+red_hat+ blue_sunglasses|crow_mask|sky_mask 3
+green_turban+ blue_sunglasses|crow_mask|sky_mask 3
+blue_sunglasses + crow_mask|sky_mask 2
+16
+
+
+yellow_hat+blue_sunglasses, red_hat+blue_sunglasses, green_turban+blue_sunglasses, crow_mask+blue_sunglasses, sky_mask+blue_sunglasses 4
+yellow_hat+crow_mask, red_hat+crow_mask, green_turban+crow_mask, green_turban+crow_mask, crow_mask 4
+blue_sunglasses+crow_mask 1
+14
+*/
+</scripts>
+<style>
+scripts {display: none;}
+</style>
